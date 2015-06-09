@@ -246,7 +246,7 @@ namespace GlashartLibrary
                 if (channels == null)
                 {
                     Logger.InfoFormat("Reading channels from XML file {0}", localFile);
-                    channels = XmlHelper.Deserialize<List<Channel>>(localFile);
+                    channels = XmlHelper.Deserialize<List<Channel>>(localFile) ?? new List<Channel>();
                     Logger.InfoFormat("{0} channels found in channels xml file", channels.Count);
                 }
 
@@ -334,30 +334,28 @@ namespace GlashartLibrary
         /// <returns></returns>
         private List<ChannelListItem> ReadChannelList(List<Channel> availableChannels)
         {
-            var result = new List<ChannelListItem>();
-
             //Read the channel list file (which has channels per line in the format {number},{originalname},{newname}. {newname} is optional)
-            string fileName = _settings.ChannelsListFile;
+            var fileName = _settings.ChannelsListFile;
             Logger.DebugFormat("Reading channel list from {0}", fileName);
+            if (!File.Exists(fileName)) CreateChannelList(fileName, availableChannels);
 
-            if (File.Exists(fileName))
+            return File.ReadLines(fileName)
+                    .Select(ChannelListItem.ReadFromString)
+                    .Where(channel => channel != null)
+                    .ToList();
+        }
+
+        private void CreateChannelList(string file, List<Channel> channels)
+        {
+            var channelsToSave = channels ?? new List<Channel>();
+            Logger.InfoFormat("Create channellist in {0} with {1} channels", file, channelsToSave.Count);
+            using (var stream = File.CreateText(file))
             {
-                foreach (var line in File.ReadLines(fileName))
-                {
-                    var channel = ChannelListItem.Parse(line);
-                    if (channel != null) result.Add(channel);
-                }
+                channelsToSave
+                    .Select(c => new ChannelListItem { Number = c.Number, OriginalName = c.Name })
+                    .ToList()
+                    .ForEach(c => stream.WriteLine(c.WriteToString()));
             }
-
-            //When the list is empty, create a list on all available channels
-            if (result.Count == 0 && availableChannels != null)
-            {
-                Logger.Debug("No channels found in channel list file. Using all available channels");
-                for (int i = 0; i < availableChannels.Count; i++)
-                    result.Add(new ChannelListItem { Number = (i + 1), OriginalName = availableChannels[i].Name });
-            }
-
-            return result;
         }
 
         /// <summary>

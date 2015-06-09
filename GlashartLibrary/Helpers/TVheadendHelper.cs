@@ -48,7 +48,7 @@ namespace GlashartLibrary.Helpers
                              //Get the (most important) location
                 mux.iptv_url = GetLocationUrl(channel, locationImportanceList);
                 mux.iptv_interface = _settings.TvheadendNetworkInterface;
-                tvhChannel.number = channel.Number;
+                tvhChannel.number = channelListItem.Number;
                 tvhChannel.AddTag(tvhTag);
                 tvhChannel.AddService(service);
             }

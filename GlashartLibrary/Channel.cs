@@ -59,18 +59,21 @@ namespace GlashartLibrary
         /// </summary>
         /// <param name="textLine">The text line.</param>
         /// <returns></returns>
-        public static ChannelListItem Parse(string textLine)
+        public static ChannelListItem ReadFromString(string textLine)
         {
-            string[] parts = textLine.Split(',');
-            if (parts.Length == 2 || parts.Length == 3)
-            {
-                int number;
-                if (int.TryParse(parts[0].Trim(), out number))
-                {
-                    return new ChannelListItem { Number = number, OriginalName = parts[1].Trim(), NewName = (parts.Length == 3 ? parts[2].Trim() : null) };
-                }
-            }
-            return null;
+            int number;
+            var parts = textLine.Split(',');
+            if (parts.Length != 2 && parts.Length != 3) return null;
+            if (!int.TryParse(parts[0].Trim(), out number)) return null;
+            
+            return new ChannelListItem { Number = number, OriginalName = parts[1].Trim(), NewName = (parts.Length == 3 ? parts[2].Trim() : null) };
+        }
+
+        public string WriteToString()
+        {
+            return string.IsNullOrWhiteSpace(NewName)
+                ? string.Join(",", Number, OriginalName)
+                : string.Join(",", Number, OriginalName, NewName);
         }
     }
 
