@@ -8,14 +8,9 @@ using Newtonsoft.Json.Linq;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public class Tag
+    public class Tag : TvhFile
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Tag));
-
-        [JsonIgnore]
-        public string Id { get; set; }
-        [JsonIgnore]
-        public State State { get; private set; }
 
         /*TvHeadend properties*/
         public bool enabled { get; set; }
@@ -33,7 +28,6 @@ namespace GlashartLibrary.TvHeadend
 
         public Tag()
         {
-            Id = Guid.NewGuid().ToString();
             enabled = true;
             index = -1;
             name = string.Empty;
@@ -73,23 +67,16 @@ namespace GlashartLibrary.TvHeadend
                 Directory.CreateDirectory(folder);
             }
             var file = Path.Combine(folder, Id);
-            var json = TvhJsonConvert.Serialize(this);
-            Logger.DebugFormat("Generated json: {0} for {1}", json, file);
-
-            State = File.Exists(file) ? State.Updated : State.Created;
-            File.WriteAllText(file, json);
-            Logger.DebugFormat("Written json to file {0} ({1})", file, State);
+            SaveToFile(file, Logger);
         }
 
         private static Tag ReadChannelFromFile(string file)
         {
             try
             {
-                var json = File.ReadAllText(file);
-                var channel = JsonConvert.DeserializeObject<Tag>(json);
-                channel.Id = file.Split(Path.DirectorySeparatorChar).Last();
-                channel.State = State.Loaded;
-                return channel;
+                var tag = LoadFromFile<Tag>(file);
+                tag.Id = file.Split(Path.DirectorySeparatorChar).Last();
+                return tag;
             }
             catch (Exception ex)
             {

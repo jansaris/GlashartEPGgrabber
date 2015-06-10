@@ -8,14 +8,12 @@ using Newtonsoft.Json.Linq;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public class Service
+    public class Service : TvhFile
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Service));
 
         [JsonIgnore]
         public string Id { get; set; }
-        [JsonIgnore]
-        public State State { get; private set; }
 
         /*TvHeadend properties*/
         public int? sid { get; set; }
@@ -43,25 +41,22 @@ namespace GlashartLibrary.TvHeadend
 
         public static Service ReadFromDisk(string file)
         {
-            Logger.InfoFormat("Read service from {0}", file);
+            Logger.DebugFormat("Read service from {0}", file);
             if (!File.Exists(file))
             {
                 Logger.WarnFormat("Service file ({0}) doesn't exist", file);
                 return null;
             }
 
-            var json = File.ReadAllText(file);
-            Logger.DebugFormat("Parse service json: {0}", json);
             try
             {
-                var service = JsonConvert.DeserializeObject<Service>(json);
+                var service = LoadFromFile<Service>(file);
                 service.Id = file.Split(Path.DirectorySeparatorChar).Last();
-                service.State = State.Loaded;
                 return service;
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "Failed to Deserialize mux from json: {0}", json);
+                Logger.Error(ex, "Failed to read and parse service data from {0}", file);
                 return null;
             }
         }

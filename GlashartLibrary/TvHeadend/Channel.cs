@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using log4net;
@@ -8,14 +7,9 @@ using Newtonsoft.Json.Linq;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public class Channel
+    public class Channel : TvhFile
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Channel));
-
-        [JsonIgnore]
-        public string Id { get; set; }
-        [JsonIgnore]
-        public State State { get; private set; }
 
         /*TvHeadend properties*/
         public bool enabled { get; set; }
@@ -29,13 +23,8 @@ namespace GlashartLibrary.TvHeadend
         public List<string> tags { get; set; }
         public string bouquet { get; set; }
 
-        /*Tvheadend extra properties*/
-        [JsonExtensionData]
-        public IDictionary<string, JToken> _additionalData;
-
         public Channel()
         {
-            Id = Guid.NewGuid().ToString();
             name = string.Empty;
             number = -1;
             icon = string.Empty;
@@ -46,7 +35,6 @@ namespace GlashartLibrary.TvHeadend
             services = new List<string>();
             tags = new List<string>();
             bouquet = string.Empty;
-            State = State.New;
         }
 
         public static List<Channel> ReadFromDisk(string tvhFolder)
@@ -61,7 +49,7 @@ namespace GlashartLibrary.TvHeadend
 
             channels.AddRange(
                 Directory.EnumerateFiles(channelsFolder)
-                         .Select(ReadChannelFromFile)
+                         .Select(LoadFromFile<Channel>)
                          .Where(channel => channel != null)
             );
 
@@ -77,29 +65,7 @@ namespace GlashartLibrary.TvHeadend
                 Directory.CreateDirectory(folder);
             }
             var file = Path.Combine(folder, Id);
-            var json = TvhJsonConvert.Serialize(this);
-            Logger.DebugFormat("Generated json: {0} for {1}", json, file);
-
-            State = File.Exists(file) ? State.Updated : State.Created;
-            File.WriteAllText(file, json);
-            Logger.DebugFormat("Written json to file {0} ({1})", file, State);
-        }
-
-        private static Channel ReadChannelFromFile(string file)
-        {
-            try
-            {
-                var json = File.ReadAllText(file);
-                var channel = JsonConvert.DeserializeObject<Channel>(json);
-                channel.Id = file.Split(Path.DirectorySeparatorChar).Last();
-                channel.State = State.Loaded;
-                return channel;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, "Failed to read and parse channel data from {0}", file);
-                return null;
-            }
+            SaveToFile(file, this);
         }
 
         private static string GetFolder(string tvhFolder)

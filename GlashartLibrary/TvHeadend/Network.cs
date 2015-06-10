@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public class Network
+    public class Network : TvhFile
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Network));
 
@@ -16,8 +16,6 @@ namespace GlashartLibrary.TvHeadend
         public string Id { get; set; }
         [JsonIgnore]
         public List<Mux> Muxes { get; set; }
-        [JsonIgnore]
-        public State State { get; private set; }
 
         /*TvHeadend properties*/
         public int? priority { get; set; }

@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public class Mux
+    public class Mux : TvhFile
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Mux));
 
@@ -16,8 +16,6 @@ namespace GlashartLibrary.TvHeadend
         public string Id { get; set; }
         [JsonIgnore]
         public List<Service> Services { get; set; }
-        [JsonIgnore]
-        public State State { get; private set; }
 
         /*TvHeadend properties*/
         public string iptv_url { get; set; }
