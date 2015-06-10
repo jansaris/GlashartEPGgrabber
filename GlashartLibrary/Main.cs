@@ -279,7 +279,7 @@ namespace GlashartLibrary
                 //Determine if a channel list is present
                 var channelList = ReadChannelList(channels);
 
-                Logger.InfoFormat("Read TvHeadend configuration from {0}", _settings.TvMenuFolder);
+                Logger.InfoFormat("Read TvHeadend configuration from {0}", _settings.TvheadendNetworkName);
                 var tvhConfig = TvhConfiguration.ReadFromDisk(_settings.TvheadendFolder, _settings.TvheadendNetworkName);
                 Logger.Info("Update TVheadend configuration based on channels");
                 _tvhHelper.UpdateTvhNetwork(tvhConfig, channels, channelList, _settings.M3U_ChannelLocationImportance.OfType<string>().ToArray());
@@ -290,7 +290,6 @@ namespace GlashartLibrary
             {
                 Logger.Error(err);
             }
-            
         }
 
         /// <summary>

@@ -57,7 +57,7 @@ namespace GlashartLibrary.TvHeadend
                 Directory.CreateDirectory(folder);
             }
 
-            SaveToFile(GetFileName(folder), this);
+            SaveToFile(GetFileName(folder));
             Muxes.ForEach(m => m.SaveToDisk(GetMuxFolder(folder)));
         }
 
@@ -82,7 +82,7 @@ namespace GlashartLibrary.TvHeadend
 
         private static Network ReadNetworkFromFolder(string folder)
         {
-            Logger.InfoFormat("Read network from {0}", folder);
+            Logger.DebugFormat("Read network from {0}", folder);
             var config = GetFileName(folder);
             if (!File.Exists(config))
             {
@@ -90,7 +90,7 @@ namespace GlashartLibrary.TvHeadend
                 return null;
             }
 
-            var network = LoadFromFile<Network>(config, folder.Split(Path.DirectorySeparatorChar).Last());
+            var network = LoadFromFile<Network>(config);
             if(network != null) ReadMuxes(network, GetMuxFolder(folder));
             return network;
         }
@@ -113,6 +113,14 @@ namespace GlashartLibrary.TvHeadend
         private static string GetFileName(string networkFolder)
         {
             return Path.Combine(networkFolder, "config");
+        }
+
+        protected override string ExtractId(string filename)
+        {
+            var folder = Path.GetDirectoryName(filename);
+            return folder != null
+                ? folder.Split(Path.DirectorySeparatorChar).Last()
+                : base.ExtractId(filename);
         }
 
         private static string GetMuxFolder(string folder)

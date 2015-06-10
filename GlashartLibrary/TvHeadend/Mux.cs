@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using log4net;
@@ -44,7 +43,7 @@ namespace GlashartLibrary.TvHeadend
                 return null;
             }
 
-            var mux = LoadFromFile<Mux>(config, folder.Split(Path.DirectorySeparatorChar).Last());
+            var mux = LoadFromFile<Mux>(config);
             if(mux != null) ReadServices(mux, GetServicesFolder(folder));
             return mux;
         }
@@ -58,7 +57,7 @@ namespace GlashartLibrary.TvHeadend
                 Directory.CreateDirectory(folder);
             }
 
-            SaveToFile(GetFileName(folder), this);
+            SaveToFile(GetFileName(folder));
             Services.ForEach(s => s.SaveToDisk(GetServicesFolder(folder)));
         }
 
@@ -80,6 +79,14 @@ namespace GlashartLibrary.TvHeadend
         private static string GetServicesFolder(string folder)
         {
             return Path.Combine(folder, "services");
+        }
+
+        protected override string ExtractId(string filename)
+        {
+            var folder = Path.GetDirectoryName(filename);
+            return folder != null
+                ? folder.Split(Path.DirectorySeparatorChar).Last()
+                : base.ExtractId(filename);
         }
 
         public Service ResolveService(string name)

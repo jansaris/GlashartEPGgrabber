@@ -35,7 +35,7 @@ namespace GlashartLibrary.TvHeadend
                 return null;
             }
 
-            return LoadFromFile<Service>(file, file.Split(Path.DirectorySeparatorChar).Last());
+            return LoadFromFile<Service>(file);
         }
 
         public void SaveToDisk(string folder)
@@ -47,7 +47,7 @@ namespace GlashartLibrary.TvHeadend
             }
 
             var file = Path.Combine(folder, Id);
-            SaveToFile(file, this);
+            SaveToFile(file);
         }        
     }
 }

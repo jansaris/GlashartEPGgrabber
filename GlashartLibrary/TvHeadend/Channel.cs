@@ -63,7 +63,7 @@ namespace GlashartLibrary.TvHeadend
                 Directory.CreateDirectory(folder);
             }
             var file = Path.Combine(folder, Id);
-            SaveToFile(file, this);
+            SaveToFile(file);
         }
 
         private static string GetFolder(string tvhFolder)

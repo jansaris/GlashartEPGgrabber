@@ -61,12 +61,12 @@ namespace GlashartLibrary.TvHeadend
             }
 
             var file = Path.Combine(folder, Id);
-            SaveToFile(file, this);
+            SaveToFile(file);
         }
 
         private static Tag ReadChannelFromFile(string file)
         {
-            return LoadFromFile<Tag>(file, file.Split(Path.DirectorySeparatorChar).Last());
+            return LoadFromFile<Tag>(file);
         }
 
         private static string GetFolder(string tvhFolder)

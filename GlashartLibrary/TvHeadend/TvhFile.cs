@@ -33,17 +33,12 @@ namespace GlashartLibrary.TvHeadend
 
         protected static T LoadFromFile<T>(string filename) where T : TvhFile
         {
-            return LoadFromFile<T>(filename, filename.Split(Path.DirectorySeparatorChar).Last());
-        }
-
-        protected static T LoadFromFile<T>(string filename, string id) where T : TvhFile
-        {
             try
             {
                 var json = File.ReadAllText(filename);
                 var tvhFile = JsonConvert.DeserializeObject<T>(json);
                 tvhFile._originalJson = json;
-                tvhFile.Id = id;
+                tvhFile.Id = tvhFile.ExtractId(filename);
                 tvhFile.State = State.Loaded;
                 return tvhFile;
             }
@@ -54,11 +49,11 @@ namespace GlashartLibrary.TvHeadend
             }
         }
 
-        protected void SaveToFile<T>(string filename, T instance) where T : TvhFile
+        protected void SaveToFile(string filename)
         {
             try
             {
-                var json = TvhJsonConvert.Serialize(instance);
+                var json = TvhJsonConvert.Serialize(this);
                 Logger.DebugFormat("Generated json: {0} for {1}", json, filename);
 
                 if (json == _originalJson)
@@ -73,8 +68,13 @@ namespace GlashartLibrary.TvHeadend
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "Failed to save {0} to file {1}", typeof(T).Name, filename);
+                Logger.Error(ex, "Failed to save {0} to file {1}", GetType().Name, filename);
             }
+        }
+
+        protected virtual string ExtractId(string filename)
+        {
+            return filename.Split(Path.DirectorySeparatorChar).Last();
         }
     }
 }
