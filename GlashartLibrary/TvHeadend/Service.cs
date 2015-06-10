@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using log4net;
 
 namespace GlashartLibrary.TvHeadend
@@ -48,6 +47,6 @@ namespace GlashartLibrary.TvHeadend
 
             var file = Path.Combine(folder, Id);
             SaveToFile(file);
-        }        
+        }
     }
 }

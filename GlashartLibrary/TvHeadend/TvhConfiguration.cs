@@ -14,6 +14,7 @@ namespace GlashartLibrary.TvHeadend
         private List<Network> _networks = new List<Network>();
         private List<Channel> _channels = new List<Channel>();
         private List<Tag> _tags = new List<Tag>();
+        private List<Epg> _epgs = new List<Epg>(); 
         private string _tvhFolder = string.Empty;
         private string _defaultNetworkName = string.Empty;
 
@@ -34,7 +35,8 @@ namespace GlashartLibrary.TvHeadend
                 _defaultNetworkName = defaultNetworkName,
                 _networks = Network.ReadFromDisk(tvhFolder),
                 _channels = Channel.ReadFromDisk(tvhFolder),
-                _tags = Tag.ReadFromDisk(tvhFolder)
+                _tags = Tag.ReadFromDisk(tvhFolder),
+                _epgs = Epg.ReadFromDisk(tvhFolder)
             };
             return config;
         }
@@ -51,6 +53,8 @@ namespace GlashartLibrary.TvHeadend
             Logger.InfoFormat("Update {0} channel(s) on disk ({1} Created; {2} Updated)", _channels.Count, _channels.Count(n => n.State == State.Created), _channels.Count(n => n.State == State.Updated));
             _tags.ForEach(n => n.SaveToDisk(_tvhFolder));
             Logger.InfoFormat("Update {0} tag(s) on disk ({1} Created; {2} Updated)", _tags.Count, _tags.Count(n => n.State == State.Created), _tags.Count(n => n.State == State.Updated));
+            _epgs.ForEach(n => n.SaveToDisk(_tvhFolder));
+            Logger.InfoFormat("Update {0} epg(s) on disk ({1} Created; {2} Updated)", _epgs.Count, _epgs.Count(n => n.State == State.Created), _epgs.Count(n => n.State == State.Updated));
         }
         
         public Mux ResolveMux(string name)
@@ -69,6 +73,11 @@ namespace GlashartLibrary.TvHeadend
         {
             var tag = _tags.FirstOrDefault(c => c.name == name);
             return tag ?? CreateTag(name);
+        }
+
+        public Epg FindEpg(string name)
+        {
+            return _epgs.FirstOrDefault(e => e.name == name);
         }
 
         private Tag CreateTag(string name)

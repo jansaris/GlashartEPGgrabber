@@ -43,6 +43,7 @@ namespace GlashartLibrary.Helpers
                 var service = mux.ResolveService(channelListItem.OriginalName);
                 var tvhTag = configuration.ResolveTag(channel.Radio ? "Radio" : "TV");
                 var tvhChannel = configuration.ResolveChannel(channelListItem.OriginalName);
+                var epg = configuration.FindEpg(tvhChannel.name);
 
                 //Update the tvheadend objects
                              //Get the (most important) location
@@ -51,6 +52,8 @@ namespace GlashartLibrary.Helpers
                 tvhChannel.number = channelListItem.Number;
                 tvhChannel.AddTag(tvhTag);
                 tvhChannel.AddService(service);
+                if (epg != null) 
+                    epg.AddChannel(tvhChannel);
             }
         }
 
