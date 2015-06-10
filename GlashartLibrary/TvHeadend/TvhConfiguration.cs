@@ -42,15 +42,15 @@ namespace GlashartLibrary.TvHeadend
         public void SaveToDisk()
         {
             _networks.ForEach(n => n.SaveToDisk(_tvhFolder));
-            Logger.InfoFormat("Saved {0} networks to disk ({1} Created; {2} Updated)", _networks.Count, _networks.Count(n => n.State == State.Created), _networks.Count(n => n.State == State.Updated));
+            Logger.InfoFormat("Update {0} network(s) on disk ({1} Created; {2} Updated)", _networks.Count, _networks.Count(n => n.State == State.Created), _networks.Count(n => n.State == State.Updated));
             var muxes = _networks.SelectMany(n => n.Muxes).ToList();
-            Logger.InfoFormat("Saved {0} muxes to disk ({1} Created; {2} Updated)", muxes.Count, muxes.Count(n => n.State == State.Created), muxes.Count(n => n.State == State.Updated));
+            Logger.InfoFormat("Update {0} mux(es) on disk ({1} Created; {2} Updated)", muxes.Count, muxes.Count(n => n.State == State.Created), muxes.Count(n => n.State == State.Updated));
             var services = muxes.SelectMany(m => m.Services).ToList();
-            Logger.InfoFormat("Saved {0} services to disk ({1} Created; {2} Updated)", services.Count, services.Count(n => n.State == State.Created), services.Count(n => n.State == State.Updated));
+            Logger.InfoFormat("Update {0} service(s) on disk ({1} Created; {2} Updated)", services.Count, services.Count(n => n.State == State.Created), services.Count(n => n.State == State.Updated));
             _channels.ForEach(n => n.SaveToDisk(_tvhFolder));
-            Logger.InfoFormat("Saved {0} channels to disk ({1} Created; {2} Updated)", _channels.Count, _channels.Count(n => n.State == State.Created), _channels.Count(n => n.State == State.Updated));
+            Logger.InfoFormat("Update {0} channel(s) on disk ({1} Created; {2} Updated)", _channels.Count, _channels.Count(n => n.State == State.Created), _channels.Count(n => n.State == State.Updated));
             _tags.ForEach(n => n.SaveToDisk(_tvhFolder));
-            Logger.InfoFormat("Saved {0} tags to disk ({1} Created; {2} Updated)", _tags.Count, _tags.Count(n => n.State == State.Created), _tags.Count(n => n.State == State.Updated));
+            Logger.InfoFormat("Update {0} tag(s) on disk ({1} Created; {2} Updated)", _tags.Count, _tags.Count(n => n.State == State.Created), _tags.Count(n => n.State == State.Updated));
         }
         
         public Mux ResolveMux(string name)

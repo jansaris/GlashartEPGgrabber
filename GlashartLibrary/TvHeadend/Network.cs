@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using log4net;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GlashartLibrary.TvHeadend
 {
@@ -12,8 +10,6 @@ namespace GlashartLibrary.TvHeadend
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Network));
 
-        [JsonIgnore]
-        public string Id { get; set; }
         [JsonIgnore]
         public List<Mux> Muxes { get; set; }
 
@@ -33,13 +29,8 @@ namespace GlashartLibrary.TvHeadend
         public int? satip_source { get; set; }
         public bool? localtime { get; set; }
 
-        /*Tvheadend extra properties*/
-        [JsonExtensionData]
-        private IDictionary<string, JToken> _additionalData;
-
         public Network()
         {
-            Id = Guid.NewGuid().ToString();
             Muxes = new List<Mux>();
 
             priority = 1;
@@ -55,7 +46,6 @@ namespace GlashartLibrary.TvHeadend
             ignore_chnum = false;
             satip_source = 0;
             localtime = false;
-            State = State.New;
         }
 
         public void SaveToDisk(string tvhFolder)
@@ -66,14 +56,8 @@ namespace GlashartLibrary.TvHeadend
                 Logger.DebugFormat("Folder doesn't exist, create {0}", folder);
                 Directory.CreateDirectory(folder);
             }
-            var file = GetFileName(folder);
-            var json = TvhJsonConvert.Serialize(this);
-            Logger.DebugFormat("Generated json: {0} for {1}", json, file);
 
-            State = File.Exists(file) ? State.Updated : State.Created;
-            File.WriteAllText(file,json);
-            Logger.DebugFormat("Written json to file {0} ({1})", file, State);
-
+            SaveToFile(GetFileName(folder), this);
             Muxes.ForEach(m => m.SaveToDisk(GetMuxFolder(folder)));
         }
 
@@ -106,22 +90,9 @@ namespace GlashartLibrary.TvHeadend
                 return null;
             }
 
-            var configJson = File.ReadAllText(config);
-            Logger.DebugFormat("Parse network config json: {0}", configJson);
-            try
-            {
-                var network = JsonConvert.DeserializeObject<Network>(configJson);
-                network.Id = folder.Split(Path.DirectorySeparatorChar).Last();
-                network.Muxes = new List<Mux>();
-                network.State = State.Loaded;
-                ReadMuxes(network, GetMuxFolder(folder));
-                return network;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, "Failed to Deserialize network from json: {0}", configJson);
-                return null;
-            }
+            var network = LoadFromFile<Network>(config, folder.Split(Path.DirectorySeparatorChar).Last());
+            if(network != null) ReadMuxes(network, GetMuxFolder(folder));
+            return network;
         }
 
         private static void ReadMuxes(Network network, string networkFolder)

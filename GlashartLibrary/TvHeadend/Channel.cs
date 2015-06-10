@@ -2,8 +2,6 @@
 using System.IO;
 using System.Linq;
 using log4net;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GlashartLibrary.TvHeadend
 {
@@ -47,10 +45,10 @@ namespace GlashartLibrary.TvHeadend
                 return channels;
             }
 
-            channels.AddRange(
-                Directory.EnumerateFiles(channelsFolder)
-                         .Select(LoadFromFile<Channel>)
-                         .Where(channel => channel != null)
+            channels.AddRange(Directory
+                    .EnumerateFiles(channelsFolder)
+                    .Select(LoadFromFile<Channel>)
+                    .Where(channel => channel != null)
             );
 
             return channels;

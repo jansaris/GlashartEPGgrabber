@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using log4net;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GlashartLibrary.TvHeadend
 {
@@ -12,8 +11,6 @@ namespace GlashartLibrary.TvHeadend
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Mux));
 
-        [JsonIgnore]
-        public string Id { get; set; }
         [JsonIgnore]
         public List<Service> Services { get; set; }
 
@@ -25,14 +22,9 @@ namespace GlashartLibrary.TvHeadend
         public bool? enabled { get; set; }
         public int? epg { get; set; }
         public int? scan_result { get; set; }
-
-        /*Tvheadend extra properties*/
-        [JsonExtensionData]
-        private IDictionary<string, JToken> _additionalData;
-
+        
         public Mux()
         {
-            Id = Guid.NewGuid().ToString();
             Services = new List<Service>();
 
             iptv_atsc = false;
@@ -40,7 +32,6 @@ namespace GlashartLibrary.TvHeadend
             enabled = true;
             scan_result = 1;
             epg = 1;
-            State = State.New;
         }
 
         public static Mux ReadFromDisk(string folder)
@@ -53,21 +44,9 @@ namespace GlashartLibrary.TvHeadend
                 return null;
             }
 
-            var configJson = File.ReadAllText(config);
-            Logger.DebugFormat("Parse mux config json: {0}", configJson);
-            try
-            {
-                var mux = JsonConvert.DeserializeObject<Mux>(configJson);
-                mux.Id = folder.Split(Path.DirectorySeparatorChar).Last();
-                mux.State = State.Loaded;
-                ReadServices(mux, GetServicesFolder(folder));
-                return mux;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, "Failed to Deserialize mux from json: {0}", configJson);
-                return null;
-            }
+            var mux = LoadFromFile<Mux>(config, folder.Split(Path.DirectorySeparatorChar).Last());
+            if(mux != null) ReadServices(mux, GetServicesFolder(folder));
+            return mux;
         }
 
         public void SaveToDisk(string networkFolder)
@@ -78,14 +57,8 @@ namespace GlashartLibrary.TvHeadend
                 Logger.DebugFormat("Folder doesn't exist, create {0}", folder);
                 Directory.CreateDirectory(folder);
             }
-            var file = GetFileName(folder);
-            var json = TvhJsonConvert.Serialize(this);
-            Logger.DebugFormat("Generated json: {0} for {1}", json, file);
 
-            State = File.Exists(file) ? State.Updated : State.Created;
-            File.WriteAllText(file, json);
-            Logger.DebugFormat("Written json to file {0} ({1})", file, State);
-
+            SaveToFile(GetFileName(folder), this);
             Services.ForEach(s => s.SaveToDisk(GetServicesFolder(folder)));
         }
 

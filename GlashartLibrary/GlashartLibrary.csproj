@@ -98,6 +98,7 @@
     <Compile Include="TvHeadend\Service.cs" />
     <Compile Include="TvHeadend\Tag.cs" />
     <Compile Include="TvHeadend\TvhConfiguration.cs" />
+    <Compile Include="TvHeadend\TvhFile.cs" />
     <Compile Include="TvHeadend\TvhJsonConvert.cs" />
     <Compile Include="TvHeadend\TvhJsonTextWriter.cs" />
   </ItemGroup>

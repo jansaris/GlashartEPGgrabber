@@ -153,7 +153,7 @@ namespace GlashartLibrary.Helpers
             }
             if (channel.Locations == null || channel.Locations.Count == 0)
             {
-                Logger.DebugFormat("TVheadend generator ignores {0}, because no locations found", channel.Name);
+                Logger.WarnFormat("TVheadend generator ignores {0}, because no locations found", channel.Name);
                 return null;
             }
             return channel;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -21,7 +22,7 @@ namespace GlashartLibrary.TvHeadend
 
         /*Tvheadend extra properties*/
         [JsonExtensionData]
-        public IDictionary<string, JToken> _additionalData;
+        private IDictionary<string, JToken> _additionalData;
 
         protected TvhFile()
         {
@@ -32,11 +33,17 @@ namespace GlashartLibrary.TvHeadend
 
         protected static T LoadFromFile<T>(string filename) where T : TvhFile
         {
+            return LoadFromFile<T>(filename, filename.Split(Path.DirectorySeparatorChar).Last());
+        }
+
+        protected static T LoadFromFile<T>(string filename, string id) where T : TvhFile
+        {
             try
             {
                 var json = File.ReadAllText(filename);
                 var tvhFile = JsonConvert.DeserializeObject<T>(json);
                 tvhFile._originalJson = json;
+                tvhFile.Id = id;
                 tvhFile.State = State.Loaded;
                 return tvhFile;
             }
