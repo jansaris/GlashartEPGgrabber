@@ -205,5 +205,14 @@ namespace GlashartLibrary.Properties {
                 return ((string)(this["TvheadendNetworkName"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool TvheadendAutoCleanup {
+            get {
+                return ((bool)(this["TvheadendAutoCleanup"]));
+            }
+        }
     }
 }

@@ -67,5 +67,8 @@
     <Setting Name="TvheadendNetworkName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Glashart</Value>
     </Setting>
+    <Setting Name="TvheadendAutoCleanup" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

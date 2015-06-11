@@ -37,6 +37,7 @@ namespace GlashartLibrary.Settings
 
         public string TvheadendNetworkInterface { get; private set; }
         public string TvheadendNetworkName { get; private set; }
+        public bool TvheadendAutoCleanup { get; private set; }
 
         public string ChannelsListFile { get { return Path.Combine(TvMenuFolder, ChannelsListFileName); } }
         private string ChannelsListFileName { get; set; }

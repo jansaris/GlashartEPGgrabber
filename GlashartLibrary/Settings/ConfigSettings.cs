@@ -24,6 +24,7 @@ namespace GlashartLibrary.Settings
         public string DataFolder { get { return Properties.Settings.Default.DataFolder; } }
         public string TvheadendFolder { get { return Properties.Settings.Default.TvheadendFolder; } }
         public string TvheadendNetworkInterface { get { return Properties.Settings.Default.TvheadendNetworkInterface; } }
-        public string TvheadendNetworkName { get; set; }
+        public string TvheadendNetworkName { get { return Properties.Settings.Default.TvheadendNetworkName; } }
+        public bool TvheadendAutoCleanup { get { return Properties.Settings.Default.TvheadendAutoCleanup; } }
     }
 }
