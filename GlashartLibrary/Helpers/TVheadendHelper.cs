@@ -25,36 +25,48 @@ namespace GlashartLibrary.Helpers
             _settings = settings;
         }
 
-        public void UpdateTvhNetwork(TvhConfiguration configuration, List<Channel> channels, List<ChannelListItem> channelList, params string[] locationImportanceList)
+        /// <summary>
+        /// Updates the TvhConfiguration based on the given channellist with the data from the channels
+        /// Per channel in the channel list
+        ///     - It will resolve the mux, service, tag, channel and epg component from the configuration
+        ///     - It will update the URL on the mux (based on the locationImportanceList)
+        ///     - It will update the number
+        ///     - Add the Radio or Tv tag to the channel
+        ///     - Add the correct service to the channel
+        ///     - Add the channel to the epg list if known
+        /// </summary>
+        /// <param name="configuration">Tv Headend configuration</param>
+        /// <param name="channels">All known channels</param>
+        public void UpdateTvhNetwork(TvhConfiguration configuration, IEnumerable<Channel> channels)
         {
             //Loop throug the channel list
-            foreach (var channelListItem in channelList)
+            foreach (var channel in channels)
             {
-                //Find channel
-                var channel = GetValidChannelFromList(channelListItem.OriginalName, channels);
-                if (channel == null)
-                {
-                    Logger.WarnFormat("Failed to find channel {0}", channelListItem.OriginalName);
-                    continue;
-                }
-
                 //Find all Tvheadend objects
-                var mux = configuration.ResolveMux(channelListItem.OriginalName);
-                var service = mux.ResolveService(channelListItem.OriginalName);
+                var mux = configuration.ResolveMux(channel.Name);
+                var service = mux.ResolveService(channel.Name);
                 var tvhTag = configuration.ResolveTag(channel.Radio ? "Radio" : "TV");
-                var tvhChannel = configuration.ResolveChannel(channelListItem.OriginalName);
+                var tvhChannel = configuration.ResolveChannel(channel.Name);
                 var epg = configuration.FindEpg(tvhChannel.name);
 
                 //Update the tvheadend objects
-                             //Get the (most important) location
-                mux.iptv_url = GetLocationUrl(channel, locationImportanceList);
+                mux.iptv_url = GetLocationUrl(channel.FirstLocationUrl);
                 mux.iptv_interface = _settings.TvheadendNetworkInterface;
-                tvhChannel.number = channelListItem.Number;
+                tvhChannel.number = channel.Number;
                 tvhChannel.AddTag(tvhTag);
                 tvhChannel.AddService(service);
-                if (epg != null) 
-                    epg.AddChannel(tvhChannel);
+                if (epg != null) epg.AddChannel(tvhChannel);
             }
+        }
+
+        /// <summary>
+      
+        /// </summary>
+        /// <param name="tvhConfig"></param>
+        /// <param name="channelList"></param>
+        public void CleanupTvhNetwork(TvhConfiguration tvhConfig, List<ChannelListItem> channelList)
+        {
+            
         }
 
         /// <summary>
@@ -143,7 +155,7 @@ namespace GlashartLibrary.Helpers
                 //if (!string.IsNullOrWhiteSpace(channel.EPG))
                 //    File.WriteAllText(folder + "\\epggrab\\xmltv\\channels\\" + channel_id, "{\n\t\"name\": \"" + identifier + "\",\n\t\"channels\": [\n\t\t\"" + channel_id + "\"\n\t]\n}");
             }
-        }        
+        }
 
         private Channel GetValidChannelFromList(string channelName, IEnumerable<Channel> channels)
         {
@@ -196,24 +208,17 @@ namespace GlashartLibrary.Helpers
             return url;
         }
 
-        private string GetLocationUrl(Channel channel, params string[] importanceList)
+        
+
+        public IEnumerable<Channel> MergeChannelLists(IEnumerable<ChannelListItem> channelList, List<Channel> channels)
         {
-            foreach (var mostImportantLocation in importanceList)
+            foreach (var channelListItem in channelList)
             {
-                var location =
-                    channel.Locations.FirstOrDefault(
-                        l => mostImportantLocation.Equals(l.Name, StringComparison.InvariantCultureIgnoreCase));
-                if (location != null)
-                {
-                    return GetLocationUrl(location.Url);
-                }
+                var channel = GetValidChannelFromList(channelListItem.OriginalName, channels);
+                if(channel == null) continue;
+                channel.Number = channelListItem.Number;
+                yield return channel;
             }
-            
-            //When no location is found, we will get the 1st one in the list
-            var firstLocation = channel.Locations.First();
-            var locationUrl = GetLocationUrl(firstLocation.Url);
-            Logger.DebugFormat("TVheadend generator selects first location {0} for channel {1}, because no important location is found", firstLocation.Name, channel.Name);
-            return locationUrl;
         }
     }
 }

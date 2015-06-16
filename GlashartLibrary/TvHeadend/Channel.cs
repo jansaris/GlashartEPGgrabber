@@ -56,6 +56,8 @@ namespace GlashartLibrary.TvHeadend
 
         public void SaveToDisk(string tvhFolder)
         {
+            if (State == State.Removed) return;
+
             var folder = GetFolder(tvhFolder);
             if (!Directory.Exists(folder))
             {
@@ -85,6 +87,11 @@ namespace GlashartLibrary.TvHeadend
             {
                 services.Add(service.Id);
             }
+        }
+
+        public void Remove(string tvhFolder)
+        {
+            RemoveFromFile(Path.Combine(GetFolder(tvhFolder), Id));
         }
     }
 }

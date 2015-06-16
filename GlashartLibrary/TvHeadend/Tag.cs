@@ -73,5 +73,10 @@ namespace GlashartLibrary.TvHeadend
         {
             return Path.Combine(tvhFolder, "channel", "tag");
         }
+
+        public void Remove(string tvhFolder)
+        {
+            RemoveFromFile(Path.Combine(GetFolder(tvhFolder), Id));
+        }
     }
 }

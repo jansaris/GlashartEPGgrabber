@@ -76,5 +76,21 @@ namespace GlashartLibrary.TvHeadend
         {
             return filename.Split(Path.DirectorySeparatorChar).Last();
         }
+
+        protected void RemoveFromFile(string file)
+        {
+            var fileinfo = new FileInfo(file);
+            var folder = fileinfo.Directory;
+            if (fileinfo.Exists)
+            {
+                Logger.DebugFormat("Remove file {0} for {1} {2}", file, GetType().Name, Id);
+                fileinfo.Delete();
+            }
+            if (folder != null && folder.Exists && folder.EnumerateFiles().Any())
+            {
+                Logger.DebugFormat("Remove empty folder {0} for {1} {2}", folder, GetType().Name, Id);
+            }
+            State = State.Removed;
+        }
     }
 }

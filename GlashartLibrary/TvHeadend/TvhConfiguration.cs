@@ -5,7 +5,7 @@ using log4net;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public enum State { New, Loaded, Created, Updated }
+    public enum State { New, Loaded, Created, Updated, Removed }
 
     public class TvhConfiguration
     {
@@ -44,17 +44,27 @@ namespace GlashartLibrary.TvHeadend
         public void SaveToDisk()
         {
             _networks.ForEach(n => n.SaveToDisk(_tvhFolder));
-            Logger.InfoFormat("Update {0} network(s) on disk ({1} Created; {2} Updated)", _networks.Count, _networks.Count(n => n.State == State.Created), _networks.Count(n => n.State == State.Updated));
+            LogUpdates(_networks, "network(s)");
             var muxes = _networks.SelectMany(n => n.Muxes).ToList();
             Logger.InfoFormat("Update {0} mux(es) on disk ({1} Created; {2} Updated)", muxes.Count, muxes.Count(n => n.State == State.Created), muxes.Count(n => n.State == State.Updated));
+            LogUpdates(muxes, "mux(es)");
             var services = muxes.SelectMany(m => m.Services).ToList();
-            Logger.InfoFormat("Update {0} service(s) on disk ({1} Created; {2} Updated)", services.Count, services.Count(n => n.State == State.Created), services.Count(n => n.State == State.Updated));
+            LogUpdates(services, "service(s)");
             _channels.ForEach(n => n.SaveToDisk(_tvhFolder));
-            Logger.InfoFormat("Update {0} channel(s) on disk ({1} Created; {2} Updated)", _channels.Count, _channels.Count(n => n.State == State.Created), _channels.Count(n => n.State == State.Updated));
+            LogUpdates(_channels, "channel(s)");
             _tags.ForEach(n => n.SaveToDisk(_tvhFolder));
-            Logger.InfoFormat("Update {0} tag(s) on disk ({1} Created; {2} Updated)", _tags.Count, _tags.Count(n => n.State == State.Created), _tags.Count(n => n.State == State.Updated));
+            LogUpdates(_tags, "tag(s)");
             _epgs.ForEach(n => n.SaveToDisk(_tvhFolder));
-            Logger.InfoFormat("Update {0} epg(s) on disk ({1} Created; {2} Updated)", _epgs.Count, _epgs.Count(n => n.State == State.Created), _epgs.Count(n => n.State == State.Updated));
+            LogUpdates(_epgs, "epg(s)");
+        }
+
+        private void LogUpdates<T>(List<T> files, string name) where T : TvhFile
+        {
+            Logger.InfoFormat("Update {0} {1} on disk ({2} Created; {3} Updated; {4} Deleted)", 
+                files.Count, name, 
+                files.Count(n => n.State == State.Created), 
+                files.Count(n => n.State == State.Updated), 
+                files.Count(n => n.State == State.Removed));
         }
         
         public Mux ResolveMux(string name)
@@ -110,6 +120,57 @@ namespace GlashartLibrary.TvHeadend
             var network = new Network { networkname = name };
             _networks.Add(network);
             return network;
+        }
+
+        /// It will clean up the Tvh Configuration based on the channellist
+        ///     - It will clean up all muxes and its services
+        ///     - It will clean up all the channels
+        ///     - It will remove the removed channels from the EPG files
+        ///     - It will clean up all the tags
+        public void CleanUp(List<string> channelList)
+        {
+            CleanUpMuxes(channelList);
+            CleanUpChannels(channelList);
+            CleanUpTags();
+        }
+
+        private void CleanUpMuxes(List<string> channelList)
+        {
+            foreach (var mux in _networks.SelectMany(n => n.Muxes))
+            {
+                //If any service name of this mux is in the channellist than the mux is required
+                if(mux.Services.Select(s => s.svcname).Any(channelList.Contains)) continue;
+                mux.Remove(_tvhFolder);
+            }
+        }
+
+        private void CleanUpChannels(List<string> channelList)
+        {
+            foreach (var channel in _channels)
+            {
+                //If the channel is in the list than it is required
+                if(channelList.Contains(channel.name)) continue;
+                channel.Remove(_tvhFolder);
+                CleanUpEpg(channel);
+            }
+        }
+
+        private void CleanUpEpg(Channel channel)
+        {
+            foreach (var epg in _epgs)
+            {
+                epg.RemoveChannel(channel);
+            }
+        }
+
+        private void CleanUpTags()
+        {
+            foreach (var tag in _tags)
+            {
+                //If any active channel has this tag, than it is required
+                if(_channels.Where(c => c.State != State.Removed).Any(c => c.tags.Contains(tag.Id))) continue;
+                tag.Remove(_tvhFolder);
+            }
         }
     }
 }

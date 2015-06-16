@@ -276,13 +276,21 @@ namespace GlashartLibrary
                     Logger.InfoFormat("{0} channels found in channels xml file", channels.Count);
                 }
 
-                //Determine if a channel list is present
+                Logger.DebugFormat("Order the locations of each channel");
+                channels.ForEach(c => c.OrderLocations(_settings.M3U_ChannelLocationImportance));
+                Logger.DebugFormat("Read the preferred channellist from the file");
                 var channelList = ReadChannelList(channels);
-
+                Logger.DebugFormat("Merge the preferred channellist with the list");
+                var preferredChannels = _tvhHelper.MergeChannelLists(channelList, channels).ToList();
                 Logger.InfoFormat("Read TvHeadend configuration from {0}", _settings.TvheadendNetworkName);
                 var tvhConfig = TvhConfiguration.ReadFromDisk(_settings.TvheadendFolder, _settings.TvheadendNetworkName);
                 Logger.Info("Update TVheadend configuration based on channels");
-                _tvhHelper.UpdateTvhNetwork(tvhConfig, channels, channelList, _settings.M3U_ChannelLocationImportance.OfType<string>().ToArray());
+                _tvhHelper.UpdateTvhNetwork(tvhConfig, preferredChannels);
+                if (_settings.TvheadendAutoCleanup)
+                {
+                    Logger.Info("Clean up the TVheadend configuration");
+                    tvhConfig.CleanUp(preferredChannels.Select(c => c.Name).ToList());
+                }
                 Logger.InfoFormat("Save updated TvHeadend configuration to {0}", _settings.TvMenuFolder);
                 tvhConfig.SaveToDisk();
             }

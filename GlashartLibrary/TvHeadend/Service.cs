@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using log4net;
 
 namespace GlashartLibrary.TvHeadend
@@ -39,6 +40,8 @@ namespace GlashartLibrary.TvHeadend
 
         public void SaveToDisk(string folder)
         {
+            if (State == State.Removed) return;
+
             if (!Directory.Exists(folder))
             {
                 Logger.DebugFormat("Folder doesn't exist, create {0}", folder);
@@ -47,6 +50,12 @@ namespace GlashartLibrary.TvHeadend
 
             var file = Path.Combine(folder, Id);
             SaveToFile(file);
+        }
+
+        public void Remove(string folder)
+        {
+            var file = Path.Combine(folder, Id);
+            RemoveFromFile(file);
         }
     }
 }

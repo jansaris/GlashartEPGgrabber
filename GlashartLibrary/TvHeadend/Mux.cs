@@ -50,6 +50,8 @@ namespace GlashartLibrary.TvHeadend
 
         public void SaveToDisk(string networkFolder)
         {
+            if (State == State.Removed) return;
+
             var folder = Path.Combine(networkFolder, Id);
             if (!Directory.Exists(folder))
             {
@@ -92,6 +94,14 @@ namespace GlashartLibrary.TvHeadend
         public Service ResolveService(string name)
         {
             return Services.First(s => s.svcname == name);
+        }
+
+        public void Remove(string networkFolder)
+        {
+            var folder = Path.Combine(networkFolder, Id);
+            Services.ForEach(s => s.Remove(GetServicesFolder(folder)));
+            var file = GetFileName(folder);
+            RemoveFromFile(file);
         }
     }
 }

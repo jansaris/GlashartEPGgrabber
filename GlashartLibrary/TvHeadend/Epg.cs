@@ -27,6 +27,12 @@ namespace GlashartLibrary.TvHeadend
             channels.Add(channel.Id);
         }
 
+        public void RemoveChannel(Channel channel)
+        {
+            if (channel == null) return;
+            channels.Remove(channel.Id);
+        }
+
         public static List<Epg> ReadFromDisk(string tvhFolder)
         {
             var folder = GetFolder(tvhFolder);
