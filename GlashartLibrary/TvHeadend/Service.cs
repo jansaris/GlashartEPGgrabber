@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using log4net;
@@ -16,6 +17,7 @@ namespace GlashartLibrary.TvHeadend
         public int? created { get; set; }
         public int? last_seen { get; set; }
         public bool? enabled { get; set; }
+        public List<Stream> stream { get; set; }
 
         public Service()
         {
@@ -24,6 +26,17 @@ namespace GlashartLibrary.TvHeadend
             enabled = true;
             created = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             last_seen = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            stream = new List<Stream>();
+        }
+
+        public void AddVerimatrixStream()
+        {
+            if (stream.Any(s => s.IsVerimatrixStream()))
+            {
+                Logger.WarnFormat("Service {0} already contains a Verimatrix stream", svcname);
+                return;
+            }
+            stream.Add(Stream.CreateVerimatrixStream());
         }
 
         public static Service ReadFromDisk(string file)
