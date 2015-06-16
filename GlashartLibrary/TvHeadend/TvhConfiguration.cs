@@ -44,16 +44,17 @@ namespace GlashartLibrary.TvHeadend
         public void SaveToDisk()
         {
             _networks.ForEach(n => n.SaveToDisk(_tvhFolder));
-            LogUpdates(_networks, "network(s)");
             var muxes = _networks.SelectMany(n => n.Muxes).ToList();
-            Logger.InfoFormat("Update {0} mux(es) on disk ({1} Created; {2} Updated)", muxes.Count, muxes.Count(n => n.State == State.Created), muxes.Count(n => n.State == State.Updated));
+            LogUpdates(_networks, "network(s)");
             LogUpdates(muxes, "mux(es)");
-            var services = muxes.SelectMany(m => m.Services).ToList();
-            LogUpdates(services, "service(s)");
+            LogUpdates(muxes.SelectMany(m => m.Services).ToList(), "service(s)");
+
             _channels.ForEach(n => n.SaveToDisk(_tvhFolder));
             LogUpdates(_channels, "channel(s)");
+
             _tags.ForEach(n => n.SaveToDisk(_tvhFolder));
             LogUpdates(_tags, "tag(s)");
+
             _epgs.ForEach(n => n.SaveToDisk(_tvhFolder));
             LogUpdates(_epgs, "epg(s)");
         }
@@ -110,7 +111,9 @@ namespace GlashartLibrary.TvHeadend
         {
             Logger.InfoFormat("Create new TVH mux with service for {0}", name);
             var mux = new Mux();
-            mux.Services.Add(new Service { svcname = name });
+            var service = new Service {svcname = name};
+            service.AddVerimatrixStream();
+            mux.Services.Add(service);
             DefaultNetwork.Muxes.Add(mux);
             return mux;
         }
@@ -136,11 +139,12 @@ namespace GlashartLibrary.TvHeadend
 
         private void CleanUpMuxes(List<string> channelList)
         {
-            foreach (var mux in _networks.SelectMany(n => n.Muxes))
+            foreach (var network in _networks)
+            foreach (var mux in network.Muxes)
             {
                 //If any service name of this mux is in the channellist than the mux is required
                 if(mux.Services.Select(s => s.svcname).Any(channelList.Contains)) continue;
-                mux.Remove(_tvhFolder);
+                network.Remove(mux, _tvhFolder);
             }
         }
 

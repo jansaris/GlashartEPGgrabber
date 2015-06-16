@@ -127,5 +127,22 @@ namespace GlashartLibrary.TvHeadend
         {
             return Path.Combine(folder, "muxes");
         }
+
+        public void Remove(Mux mux, string tvhFolder)
+        {
+            if (mux == null)
+            {
+                Logger.Error("Can't remove an empty mux");
+                return;
+            }
+            if (!Muxes.Contains(mux))
+            {
+                Logger.ErrorFormat("Can't mux {0} because it doesn't belong to network {1}", mux.Id, Id);
+                return;
+            }
+            var networksFolder = GetFolder(tvhFolder);
+            var thisNetworkFolder = Path.Combine(networksFolder, Id);
+            mux.Remove(GetMuxFolder(thisNetworkFolder));
+        }
     }
 }
