@@ -40,7 +40,7 @@ namespace GlashartLibrary.TvHeadend
             if (!Directory.Exists(folder))
             {
                 Logger.WarnFormat("Epg directory ({0}) doesn't exist", folder);
-                return null;
+                return new List<Epg>();
             }
 
             return Directory.EnumerateFiles(folder)

@@ -24,7 +24,7 @@ namespace GlashartLibrary.Settings
         public string TvMenuFolder { get { return Path.Combine(DataFolder, "TvMenu"); } }
         public string EpgFolder { get { return Path.Combine(DataFolder, "Epg"); } }
         public string IconFolder { get { return Path.Combine(DataFolder, "Icons"); } }
-        public string TvheadendFolder { get { return Path.Combine(DataFolder, "TVheadend"); } }
+        public string TvheadendFolder { get; private set; }
 
         public string XmlTvFile { get { return Path.Combine(DataFolder, XmlTvFileName); } }
         private string XmlTvFileName { get; set; }
