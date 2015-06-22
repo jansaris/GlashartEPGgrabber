@@ -26,7 +26,7 @@ namespace GlashartLibrary.TvHeadend
 
         protected TvhFile()
         {
-            Id = Guid.NewGuid().ToString();
+            Id = Guid.NewGuid().ToString("N");
             _originalJson = string.Empty;
             State = State.New;
         }

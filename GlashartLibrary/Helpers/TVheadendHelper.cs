@@ -206,7 +206,7 @@ namespace GlashartLibrary.Helpers
         private string GetLocationUrl(string url)
         {
             if (_settings.IgmpToUdp)
-                url = url.Replace("igmp://", "udp://@");
+                url = url.Replace("igmp://", "udp://");
             return url;
         }
 
