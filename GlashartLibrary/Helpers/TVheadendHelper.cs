@@ -48,6 +48,7 @@ namespace GlashartLibrary.Helpers
                 var tvhTag = configuration.ResolveTag(channel.Radio ? "Radio" : "TV");
                 var tvhChannel = configuration.ResolveChannel(channel.Name);
                 var epg = configuration.FindEpg(tvhChannel.name);
+                if (epg == null) configuration.FindEpg(channel.Key);
 
                 //Update the tvheadend objects
                 mux.iptv_url = GetLocationUrl(channel.FirstLocationUrl);
@@ -56,6 +57,7 @@ namespace GlashartLibrary.Helpers
                 tvhChannel.AddTag(tvhTag);
                 tvhChannel.AddService(service);
                 if (epg != null) epg.AddChannel(tvhChannel);
+                else Logger.InfoFormat("Didn't find any EPG for {0} or {1}", channel.Name, channel.Key);
             }
         }
 

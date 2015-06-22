@@ -88,7 +88,8 @@ namespace GlashartLibrary.TvHeadend
 
         public Epg FindEpg(string name)
         {
-            return _epgs.FirstOrDefault(e => e.name == name);
+            return _epgs.FirstOrDefault(e => String.Compare(e.name, name, StringComparison.OrdinalIgnoreCase) == 0) ??
+                   _epgs.FirstOrDefault(e => String.Compare(e.Id, name, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         private Tag CreateTag(string name)
