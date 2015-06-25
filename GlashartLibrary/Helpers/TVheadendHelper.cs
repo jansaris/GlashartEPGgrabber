@@ -43,7 +43,7 @@ namespace GlashartLibrary.Helpers
             foreach (var channel in channels)
             {
                 //Find all Tvheadend objects
-                var mux = configuration.ResolveMux(channel.Name);
+                var mux = configuration.ResolveMux(channel.Name, _settings.TvheadendExtraSerivesPerMux);
                 var service = mux.ResolveService(channel.Name);
                 var tvhTag = configuration.ResolveTag(channel.Radio ? "Radio" : "TV");
                 var tvhChannel = configuration.ResolveChannel(channel.Name);
@@ -52,6 +52,8 @@ namespace GlashartLibrary.Helpers
 
                 //Update the tvheadend objects
                 mux.iptv_url = GetLocationUrl(channel.FirstLocationUrl);
+                mux.iptv_muxname = string.Format("{0} {1}", channel.Name, channel.FirstLocationQuality);
+                mux.iptv_sname = channel.Name;
                 mux.iptv_interface = _settings.TvheadendNetworkInterface;
                 tvhChannel.number = channel.Number;
                 tvhChannel.AddTag(tvhTag);
@@ -59,16 +61,6 @@ namespace GlashartLibrary.Helpers
                 if (epg != null) epg.AddChannel(tvhChannel);
                 else Logger.InfoFormat("Didn't find any EPG for {0} or {1}", channel.Name, channel.Key);
             }
-        }
-
-        /// <summary>
-      
-        /// </summary>
-        /// <param name="tvhConfig"></param>
-        /// <param name="channelList"></param>
-        public void CleanupTvhNetwork(TvhConfiguration tvhConfig, List<ChannelListItem> channelList)
-        {
-            
         }
 
         /// <summary>
@@ -206,11 +198,9 @@ namespace GlashartLibrary.Helpers
         private string GetLocationUrl(string url)
         {
             if (_settings.IgmpToUdp)
-                url = url.Replace("igmp://", "udp://");
+                url = url.Replace("igmp://", _settings.TvheadendIgmpReplacement);
             return url;
         }
-
-        
 
         public IEnumerable<Channel> MergeChannelLists(IEnumerable<ChannelListItem> channelList, List<Channel> channels)
         {

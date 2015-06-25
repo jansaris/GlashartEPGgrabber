@@ -32,11 +32,13 @@ namespace GlashartLibrary.Settings
         public string DownloadedM3UFile { get { return Path.Combine(TvMenuFolder, DownloadedM3UFileName); } }
         private string DownloadedM3UFileName { get; set; }
 
-        public string TvhGenreTranslationsFile { get { return Path.Combine(DataFolder, TvhGenreTranslationsFileName); } }
+        public string TvheadendGenreTranslationsFile { get { return Path.Combine(DataFolder, TvhGenreTranslationsFileName); } }
         private string TvhGenreTranslationsFileName { get; set; }
 
+        public string TvheadendIgmpReplacement { get; private set; }
         public string TvheadendNetworkInterface { get; private set; }
         public string TvheadendNetworkName { get; private set; }
+        public int TvheadendExtraSerivesPerMux { get; private set; }
         public bool TvheadendAutoCleanup { get; private set; }
 
         public string ChannelsListFile { get { return Path.Combine(TvMenuFolder, ChannelsListFileName); } }

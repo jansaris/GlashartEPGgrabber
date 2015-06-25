@@ -141,10 +141,10 @@ namespace GlashartEPGgrabber
         private static IGenreTranslator GetTranslator(ISettings settings)
         {
             IGenreTranslator translator = null;
-            if (!string.IsNullOrWhiteSpace(settings.TvhGenreTranslationsFile))
+            if (!string.IsNullOrWhiteSpace(settings.TvheadendGenreTranslationsFile))
             {
                 var tvhTranslator = new TvhGenreTranslator();
-                tvhTranslator.Load(settings.TvhGenreTranslationsFile);
+                tvhTranslator.Load(settings.TvheadendGenreTranslationsFile);
                 translator = tvhTranslator;
             }
             return translator;

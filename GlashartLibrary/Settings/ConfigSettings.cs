@@ -16,7 +16,8 @@ namespace GlashartLibrary.Settings
         public string XmlTvFile { get { return Properties.Settings.Default.XmlTvFileName; } }
         public string M3UFile { get { return Properties.Settings.Default.M3UfileName; } }
         public string DownloadedM3UFile { get { return Properties.Settings.Default.DownloadedM3UFileName; } }
-        public string TvhGenreTranslationsFile { get { return Properties.Settings.Default.TvhGenreTranslationsFile; } }
+        public string TvheadendIgmpReplacement { get { return Properties.Settings.Default.TvhIgmpReplacement; } }
+        public string TvheadendGenreTranslationsFile { get { return Properties.Settings.Default.TvhGenreTranslationsFile; } }
         public int EpgNumberOfDays { get { return Properties.Settings.Default.EpgNumberOfDays; } }
         public string EpgFolder { get { return Properties.Settings.Default.EpgFolder; } }
         public int EpgArchiving { get { return Properties.Settings.Default.EpgArchiving; } }
@@ -25,6 +26,7 @@ namespace GlashartLibrary.Settings
         public string TvheadendFolder { get { return Properties.Settings.Default.TvheadendFolder; } }
         public string TvheadendNetworkInterface { get { return Properties.Settings.Default.TvheadendNetworkInterface; } }
         public string TvheadendNetworkName { get { return Properties.Settings.Default.TvheadendNetworkName; } }
+        public int TvheadendExtraSerivesPerMux { get { return Properties.Settings.Default.TvheadendExtraSerivesPerMux; } }
         public bool TvheadendAutoCleanup { get { return Properties.Settings.Default.TvheadendAutoCleanup; } }
     }
 }

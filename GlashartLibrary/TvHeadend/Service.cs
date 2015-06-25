@@ -19,14 +19,23 @@ namespace GlashartLibrary.TvHeadend
         public bool? enabled { get; set; }
         public List<Stream> stream { get; set; }
 
-        public Service()
+        public Service(int sid)
         {
-            sid = 1;
+            this.sid = sid;
             dvb_servicetype = 1;
             enabled = true;
             created = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             last_seen = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             stream = new List<Stream>();
+        }
+
+        /// <summary>
+        /// Don't use this constructor
+        /// This constructor will be used by Newtonsoft.Json
+        /// </summary>
+        public Service() : this(1)
+        {
+
         }
 
         public void AddVerimatrixStream()

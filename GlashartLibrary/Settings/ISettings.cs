@@ -23,9 +23,11 @@ namespace GlashartLibrary.Settings
         string M3UFile { get; }
         string XmlTvFile { get; }
         string DownloadedM3UFile { get; }
-        string TvhGenreTranslationsFile { get; }
+        string TvheadendIgmpReplacement { get; }
+        string TvheadendGenreTranslationsFile { get; }
         string TvheadendNetworkInterface { get; }
         string TvheadendNetworkName { get; }
+        int TvheadendExtraSerivesPerMux { get; }
         bool TvheadendAutoCleanup { get; }
     }
 }

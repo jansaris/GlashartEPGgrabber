@@ -16,6 +16,8 @@ namespace GlashartLibrary.TvHeadend
         /*TvHeadend properties*/
         public string iptv_url { get; set; }
         public string iptv_interface { get; set; }
+        public string iptv_muxname { get; set; }
+        public string iptv_sname { get; set; }
         public bool? iptv_atsc { get; set; }
         public bool? iptv_respawn { get; set; }
         public bool? enabled { get; set; }
@@ -93,7 +95,7 @@ namespace GlashartLibrary.TvHeadend
 
         public Service ResolveService(string name)
         {
-            return Services.First(s => s.svcname == name);
+            return Services.OrderBy(s => s.sid).First(s => s.svcname == name);
         }
 
         public void Remove(string networkFolder)

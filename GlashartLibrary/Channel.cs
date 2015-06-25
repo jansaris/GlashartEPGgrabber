@@ -43,6 +43,15 @@ namespace GlashartLibrary
             }
         }
 
+        public string FirstLocationQuality
+        {
+            get
+            {
+                if (Locations == null) Locations = new List<ChannelLocation>();
+                return Locations.Any() ? Locations.First().Name : null;
+            }
+        }
+
         public override string ToString()
         {
             return string.Format("{0} ({1}). {2} locations", Name, Key, (Locations != null ? Locations.Count : 0));
