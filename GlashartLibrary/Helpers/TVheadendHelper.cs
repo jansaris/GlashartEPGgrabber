@@ -57,7 +57,7 @@ namespace GlashartLibrary.Helpers
                 mux.iptv_interface = _settings.TvheadendNetworkInterface;
                 tvhChannel.number = channel.Number;
                 tvhChannel.AddTag(tvhTag);
-                tvhChannel.AddService(service);
+                if(service != null) tvhChannel.AddService(service);
                 if (epg != null) epg.AddChannel(tvhChannel);
                 else Logger.InfoFormat("Didn't find any EPG for {0} or {1}", channel.Name, channel.Key);
             }

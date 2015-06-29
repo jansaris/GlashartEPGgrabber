@@ -17,12 +17,15 @@ namespace GlashartLibrary.TvHeadend
         public int? created { get; set; }
         public int? last_seen { get; set; }
         public bool? enabled { get; set; }
+        public string provider { get; set; }
+        public int? pmt { get; set; }
+        public int? pcr { get; set; }
         public List<Stream> stream { get; set; }
 
         public Service(int sid)
         {
             this.sid = sid;
-            dvb_servicetype = 1;
+            dvb_servicetype = 0;
             enabled = true;
             created = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             last_seen = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
@@ -45,7 +48,12 @@ namespace GlashartLibrary.TvHeadend
                 Logger.WarnFormat("Service {0} already contains a Verimatrix stream", svcname);
                 return;
             }
-            stream.Add(Stream.CreateVerimatrixStream());
+            stream.Add(Stream.CreateVerimatrix());
+            var video = Stream.CreateH264();
+            pcr = video.pid;
+            stream.Add(video);
+            stream.Add(Stream.CreateTeletext());
+            stream.Add(Stream.CreateAc3());
         }
 
         public static Service ReadFromDisk(string file)

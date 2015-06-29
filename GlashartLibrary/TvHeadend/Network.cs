@@ -95,14 +95,20 @@ namespace GlashartLibrary.TvHeadend
             return network;
         }
 
-        private static void ReadMuxes(Network network, string networkFolder)
+        private static void ReadMuxes(Network network, string muxesFolder)
         {
             Logger.DebugFormat("Read muxes for network {0} ({1}) from disk", network.Id, network.networkname);
+            if (!Directory.Exists(muxesFolder))
+            {
+                Logger.DebugFormat("The folder {0} doesn't exist, skip reading muxes for network {1}", muxesFolder, network.networkname);
+                return;
+            }
             network.Muxes.AddRange(
-                Directory.EnumerateDirectories(networkFolder)
+                Directory.EnumerateDirectories(muxesFolder)
                          .Select(Mux.ReadFromDisk)
                          .Where(mux => mux != null)
             );
+            network.Muxes.ForEach(m => m.NetworkId = network.Id);
         }
 
         private static string GetFolder(string tvhFolder)

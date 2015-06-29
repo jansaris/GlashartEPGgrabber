@@ -17,7 +17,6 @@ namespace GlashartLibrary.TvHeadend
         private List<Epg> _epgs = new List<Epg>(); 
         private string _tvhFolder = string.Empty;
         private string _defaultNetworkName = string.Empty;
-        private readonly SidGenerator _sidGenerator = new SidGenerator();
 
         private Network DefaultNetwork
         {
@@ -30,7 +29,7 @@ namespace GlashartLibrary.TvHeadend
 
         public static TvhConfiguration ReadFromDisk(string tvhFolder, string defaultNetworkName)
         {
-            var config = new TvhConfiguration()
+            var config = new TvhConfiguration
             {
                 _tvhFolder = tvhFolder,
                 _defaultNetworkName = defaultNetworkName,
@@ -39,8 +38,6 @@ namespace GlashartLibrary.TvHeadend
                 _tags = Tag.ReadFromDisk(tvhFolder),
                 _epgs = Epg.ReadFromDisk(tvhFolder)
             };
-            //Register all the existing services in the sid generator
-            config._sidGenerator.RegisterExistingSids(config._networks.SelectMany(n => n.Muxes.SelectMany(m => m.Services)));
             return config;
         }
 
@@ -73,8 +70,8 @@ namespace GlashartLibrary.TvHeadend
         
         public Mux ResolveMux(string name, int nrOfExtraServices)
         {
-            var mux = _networks.SelectMany(n => n.Muxes).FirstOrDefault(m => m.Services.Any(s => s.svcname == name));
-            return mux ?? CreateMux(name, nrOfExtraServices);
+            var mux = _networks.SelectMany(n => n.Muxes).FirstOrDefault(m => m.iptv_sname == name);
+            return mux ?? CreateMux(name);
         }
 
         public Channel ResolveChannel(string name)
@@ -111,29 +108,12 @@ namespace GlashartLibrary.TvHeadend
             return channel;
         }
 
-        private Mux CreateMux(string name, int nrOfExtraServices)
+        private Mux CreateMux(string name)
         {
             Logger.InfoFormat("Create new TVH mux with service for {0}", name);
-            var mux = new Mux();
-            mux.Services.Add(CreatePrimaryService(name));
-            for(var i = 0; i < nrOfExtraServices; i++) mux.Services.Add(CreateSecondaryService(name));
+            var mux = new Mux {NetworkId = DefaultNetwork.Id};
             DefaultNetwork.Muxes.Add(mux);
             return mux;
-        }
-
-        private Service CreatePrimaryService(string name)
-        {
-            var sid = _sidGenerator.CreatePrimarySid();
-            var service = new Service(sid) { svcname = name };
-            service.AddVerimatrixStream();
-            return service;
-        }
-
-        private Service CreateSecondaryService(string name)
-        {
-            var sid = _sidGenerator.CreateSecondarySid();
-            var service = new Service(sid) {svcname = name};
-            return service;
         }
 
         private Network CreateNetwork(string name)
@@ -160,8 +140,8 @@ namespace GlashartLibrary.TvHeadend
             foreach (var network in _networks)
             foreach (var mux in network.Muxes)
             {
-                //If any service name of this mux is in the channellist than the mux is required
-                if(mux.Services.Select(s => s.svcname).Any(channelList.Contains)) continue;
+                //If the service name of this mux is in the channellist than the mux is required
+                if(channelList.Contains(mux.iptv_sname)) continue;
                 network.Remove(mux, _tvhFolder);
             }
         }

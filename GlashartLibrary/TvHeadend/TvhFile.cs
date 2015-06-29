@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -17,6 +19,11 @@ namespace GlashartLibrary.TvHeadend
 
         [JsonIgnore]
         public State State { get; private set; }
+
+        [JsonIgnore]
+        public virtual string CreateUrl { get { return string.Empty; } }
+        [JsonIgnore]
+        public virtual object CreateData { get { return string.Empty; } }
 
         [JsonIgnore] private string _originalJson;
 
@@ -63,13 +70,27 @@ namespace GlashartLibrary.TvHeadend
                 }
 
                 State = File.Exists(filename) ? State.Updated : State.Created;
-                File.WriteAllText(filename, json);
-                Logger.DebugFormat("Written json to file {0} ({1})", filename, State);
+                if (!PostOnUrl())
+                {
+                    File.WriteAllText(filename, json);
+                    Logger.DebugFormat("Written json to file {0} ({1})", filename, State);
+                }
             }
             catch (Exception ex)
             {
                 Logger.Error(ex, "Failed to save {0} to file {1}", GetType().Name, filename);
             }
+        }
+
+        private bool PostOnUrl()
+        {
+            if (State != State.Created) return false;
+            if (string.IsNullOrWhiteSpace(CreateUrl)) return false;
+            var comm = new TvhWebCommunication();
+            comm.Create(CreateUrl, CreateData);
+            Logger.InfoFormat("Created {0} on tvheadend using web. Give it 5 sec to initialize", GetType().Name);
+            comm.WaitUntilScanCompleted();
+            return true;
         }
 
         protected virtual string ExtractId(string filename)

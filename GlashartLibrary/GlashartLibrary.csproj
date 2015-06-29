@@ -47,6 +47,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -97,13 +98,13 @@
     <Compile Include="TvHeadend\Mux.cs" />
     <Compile Include="TvHeadend\Network.cs" />
     <Compile Include="TvHeadend\Service.cs" />
-    <Compile Include="TvHeadend\SidGenerator.cs" />
     <Compile Include="TvHeadend\Stream.cs" />
     <Compile Include="TvHeadend\Tag.cs" />
     <Compile Include="TvHeadend\TvhConfiguration.cs" />
     <Compile Include="TvHeadend\TvhFile.cs" />
     <Compile Include="TvHeadend\TvhJsonConvert.cs" />
     <Compile Include="TvHeadend\TvhJsonTextWriter.cs" />
+    <Compile Include="TvHeadend\TvhWebCommunication.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
