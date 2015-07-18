@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using GlashartLibrary.Settings;
+using GlashartLibrary.TvHeadend.Web;
 using log4net;
 
 namespace GlashartLibrary.TvHeadend
@@ -10,6 +13,7 @@ namespace GlashartLibrary.TvHeadend
     public class TvhConfiguration
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(TvhConfiguration));
+        
 
         private List<Network> _networks = new List<Network>();
         private List<Channel> _channels = new List<Channel>();
@@ -41,6 +45,40 @@ namespace GlashartLibrary.TvHeadend
             return config;
         }
 
+        public static TvhConfiguration ReadFromWeb(ISettings settings)
+        {
+            var config = new TvhConfiguration
+            {
+                _defaultNetworkName = settings.TvheadendNetworkName,
+                _networks = ReadFromWeb<Network>(settings.TvheadendHostAddress),
+                _channels = ReadFromWeb<Channel>(settings.TvheadendHostAddress),
+                _tags = ReadFromWeb<Tag>(settings.TvheadendHostAddress),
+                _epgs = ReadFromWeb<Epg>(settings.TvheadendHostAddress)
+                //TODO: Ik probeer de EPG tabel op te halen via het web
+            };
+            var muxes = ReadFromWeb<Mux>(settings.TvheadendHostAddress);
+            var services = ReadFromWeb<Service>(settings.TvheadendHostAddress);
+            muxes.ForEach(mux => mux.Services.AddRange(services.Where(service => service.multiplex_uuid == mux.uuid)));
+            config._networks.ForEach(network => network.Muxes.AddRange(muxes.Where(mux => mux.network_uuid == network.uuid)));
+            return config;
+        }
+
+        private static List<T> ReadFromWeb<T>(string hostAddress) where T : TvhObject, new()
+        {
+            Logger.DebugFormat("Read {0} from web at {1}", typeof(T).Name, hostAddress);
+            var instance = new T();
+            var web = new TvhCommunication(hostAddress);
+            var result = web.GetTableResult<T>(instance.Urls.List);
+            if (result == null)
+            {
+                Logger.WarnFormat("Received no awnser from the web interface at {0}", hostAddress);
+                return new List<T>();
+            }
+            result.entries.ForEach(obj => obj.State = State.Loaded);
+            Logger.InfoFormat("Read {0} {1} from the tvheadend web interface", result.total, typeof(T).Name);
+            return result.entries;
+        } 
+
         public void SaveToDisk()
         {
             _networks.ForEach(n => n.SaveToDisk(_tvhFolder));
@@ -59,7 +97,7 @@ namespace GlashartLibrary.TvHeadend
             LogUpdates(_epgs, "epg(s)");
         }
 
-        private void LogUpdates<T>(List<T> files, string name) where T : TvhFile
+        private void LogUpdates<T>(List<T> files, string name) where T : TvhObject
         {
             Logger.InfoFormat("Update {0} {1} on disk ({2} Created; {3} Updated; {4} Deleted)", 
                 files.Count, name, 
@@ -89,7 +127,7 @@ namespace GlashartLibrary.TvHeadend
         public Epg FindEpg(string name)
         {
             return _epgs.FirstOrDefault(e => String.Compare(e.name, name, StringComparison.OrdinalIgnoreCase) == 0) ??
-                   _epgs.FirstOrDefault(e => String.Compare(e.Id, name, StringComparison.OrdinalIgnoreCase) == 0);
+                   _epgs.FirstOrDefault(e => String.Compare(e.uuid, name, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         private Tag CreateTag(string name)
@@ -111,7 +149,7 @@ namespace GlashartLibrary.TvHeadend
         private Mux CreateMux(string name)
         {
             Logger.InfoFormat("Create new TVH mux with service for {0}", name);
-            var mux = new Mux {NetworkId = DefaultNetwork.Id};
+            var mux = new Mux {network_uuid = DefaultNetwork.uuid};
             DefaultNetwork.Muxes.Add(mux);
             return mux;
         }
@@ -170,7 +208,7 @@ namespace GlashartLibrary.TvHeadend
             foreach (var tag in _tags)
             {
                 //If any active channel has this tag, than it is required
-                if(_channels.Where(c => c.State != State.Removed).Any(c => c.tags.Contains(tag.Id))) continue;
+                if(_channels.Where(c => c.State != State.Removed).Any(c => c.tags.Contains(tag.uuid))) continue;
                 tag.Remove(_tvhFolder);
             }
         }

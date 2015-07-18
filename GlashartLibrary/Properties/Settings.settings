@@ -76,5 +76,8 @@
     <Setting Name="TvheadendExtraSerivesPerMux" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">1</Value>
     </Setting>
+    <Setting Name="TvheadendHostAddress" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">localhost:9981</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -8,12 +7,12 @@ using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace GlashartLibrary.TvHeadend
+namespace GlashartLibrary.TvHeadend.Web
 {
     public class TvhWebCommunication
     {
         private string _hostUrl = "192.168.10.20:9981";
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(TvhFile));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(TvhWebCommunication));
 
         public void Create(string uri, object data)
         {
@@ -30,8 +29,8 @@ namespace GlashartLibrary.TvHeadend
 
             var jObj = (JObject)JsonConvert.DeserializeObject(json);
             var query = String.Join("&",
-                            jObj.Children().Cast<JProperty>()
-                            .Select(jp => jp.Name + "=" + HttpUtility.UrlEncode(jp.Value.ToString())));
+                jObj.Children().Cast<JProperty>()
+                    .Select(jp => jp.Name + "=" + HttpUtility.UrlEncode(jp.Value.ToString())));
             return query;
         }
 
@@ -80,14 +79,8 @@ namespace GlashartLibrary.TvHeadend
             var client = CreateWebClient();
             var url = string.Concat("http://", _hostUrl, "/api/mpegts/mux/grid");
             var data = client.DownloadString(url);
-            var deserialized = JsonConvert.DeserializeObject<Grid<Mux>>(data);
+            var deserialized = JsonConvert.DeserializeObject<TvhTable<Mux>>(data);
             return deserialized.entries.All(s => s.scan_state == 0);
         }
-    }
-
-    public class Grid<T>
-    {
-        public List<T> entries { get; set; }
-        public int total { get; set; }
     }
 }

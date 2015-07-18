@@ -38,6 +38,7 @@ namespace GlashartLibrary.Settings
         public string TvheadendIgmpReplacement { get; private set; }
         public string TvheadendNetworkInterface { get; private set; }
         public string TvheadendNetworkName { get; private set; }
+        public string TvheadendHostAddress { get; private set; }
         public int TvheadendExtraSerivesPerMux { get; private set; }
         public bool TvheadendAutoCleanup { get; private set; }
 

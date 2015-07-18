@@ -6,8 +6,10 @@ using System.Reflection;
 using GlashartLibrary.Helpers;
 using GlashartLibrary.IO;
 using GlashartLibrary.Settings;
+using GlashartLibrary.TvHeadend;
 using log4net;
 using log4net.Config;
+using Channel = GlashartLibrary.Channel;
 
 namespace GlashartEPGgrabber
 {
@@ -135,6 +137,7 @@ namespace GlashartEPGgrabber
             var fileDownloader = new FileDownloader(_webDownloader);
             var downloader = new Downloader(_cachedWebDownloader, fileDownloader);
             var translator = GetTranslator(settings);
+            var result = TvhConfiguration.ReadFromWeb(settings);
             return new Main(settings, downloader, translator);
         }
 

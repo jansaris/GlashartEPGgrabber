@@ -27,6 +27,7 @@ namespace GlashartLibrary.Settings
         string TvheadendGenreTranslationsFile { get; }
         string TvheadendNetworkInterface { get; }
         string TvheadendNetworkName { get; }
+        string TvheadendHostAddress { get; }
         int TvheadendExtraSerivesPerMux { get; }
         bool TvheadendAutoCleanup { get; }
     }

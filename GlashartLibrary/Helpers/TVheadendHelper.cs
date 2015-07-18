@@ -131,7 +131,7 @@ namespace GlashartLibrary.Helpers
                 var identifier = new string(id);
                 //Image icon
                 var img = channel.Icons.FirstOrDefault(ico => File.Exists(Path.Combine(_settings.IconFolder, ico)));
-                //Id's
+                //uuid's
                 var muxId = Guid.NewGuid().ToString("N");
                 var svcId = Guid.NewGuid().ToString("N");
                 var channelId = Guid.NewGuid().ToString("N");

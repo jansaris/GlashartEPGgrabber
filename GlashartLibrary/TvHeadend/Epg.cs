@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using GlashartLibrary.TvHeadend.Web;
 using log4net;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public class Epg : TvhFile
+    public class Epg : TvhObject
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Epg));
 
@@ -22,15 +23,15 @@ namespace GlashartLibrary.TvHeadend
         public void AddChannel(Channel channel)
         {
             if (channel == null) return;
-            if (channels.Contains(channel.Id)) return;
-            
-            channels.Add(channel.Id);
+            if (channels.Contains(channel.uuid)) return;
+
+            channels.Add(channel.uuid);
         }
 
         public void RemoveChannel(Channel channel)
         {
             if (channel == null) return;
-            channels.Remove(channel.Id);
+            channels.Remove(channel.uuid);
         }
 
         public static List<Epg> ReadFromDisk(string tvhFolder)
@@ -57,13 +58,25 @@ namespace GlashartLibrary.TvHeadend
                 Directory.CreateDirectory(folder);
             }
 
-            var file = Path.Combine(folder, Id);
+            var file = Path.Combine(folder, uuid);
             SaveToFile(file);
         }
 
         private static string GetFolder(string tvhFolder)
         {
             return Path.Combine(tvhFolder, "epggrab", "xmltv", "channels");
+        }
+
+        public override Urls Urls
+        {
+            get
+            {
+                return new Urls
+                {
+                    Create = string.Empty,
+                    List = "/api/epggrab/channel/list",
+                };
+            }
         }
     }
 }

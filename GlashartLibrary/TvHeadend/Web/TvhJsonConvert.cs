@@ -1,7 +1,7 @@
-﻿using System.IO; 
+﻿using System.IO;
 using Newtonsoft.Json;
 
-namespace GlashartLibrary.TvHeadend
+namespace GlashartLibrary.TvHeadend.Web
 {
     public class TvhJsonConvert
     {

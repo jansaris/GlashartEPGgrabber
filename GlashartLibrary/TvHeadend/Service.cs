@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using GlashartLibrary.TvHeadend.Web;
 using log4net;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public class Service : TvhFile
+    public class Service : TvhObject
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Service));
 
         /*TvHeadend properties*/
+        public string multiplex_uuid { get; set; }
         public int? sid { get; set; }
         public string svcname { get; set; }
         public int? dvb_servicetype { get; set; }
@@ -78,14 +80,26 @@ namespace GlashartLibrary.TvHeadend
                 Directory.CreateDirectory(folder);
             }
 
-            var file = Path.Combine(folder, Id);
+            var file = Path.Combine(folder, uuid);
             SaveToFile(file);
         }
 
         public void Remove(string folder)
         {
-            var file = Path.Combine(folder, Id);
+            var file = Path.Combine(folder, uuid);
             RemoveFromFile(file);
+        }
+
+        public override Urls Urls
+        {
+            get
+            {
+                return new Urls
+                {
+                    List = "/api/mpegts/service/grid",
+                    Create = ""
+                };
+            }
         }
     }
 }

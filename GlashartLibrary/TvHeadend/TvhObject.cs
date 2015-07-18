@@ -4,26 +4,30 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using GlashartLibrary.TvHeadend.Web;
 using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public abstract class TvhFile
+    public abstract class TvhObject
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(TvhFile));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(TvhObject));
+
+        /*TvHeadend properties*/
+        [JsonProperty]
+        public string uuid { get; private set; }
 
         [JsonIgnore]
-        public string Id { get; private set; }
-
-        [JsonIgnore]
-        public State State { get; private set; }
+        public State State { get; set; }
 
         [JsonIgnore]
         public virtual string CreateUrl { get { return string.Empty; } }
         [JsonIgnore]
         public virtual object CreateData { get { return string.Empty; } }
+
+        public abstract Urls Urls { get; }
 
         [JsonIgnore] private string _originalJson;
 
@@ -31,21 +35,21 @@ namespace GlashartLibrary.TvHeadend
         [JsonExtensionData]
         private IDictionary<string, JToken> _additionalData;
 
-        protected TvhFile()
+        protected TvhObject()
         {
-            Id = Guid.NewGuid().ToString("N");
+            uuid = Guid.NewGuid().ToString("N");
             _originalJson = string.Empty;
             State = State.New;
         }
 
-        protected static T LoadFromFile<T>(string filename) where T : TvhFile
+        protected static T LoadFromFile<T>(string filename) where T : TvhObject
         {
             try
             {
                 var json = File.ReadAllText(filename);
                 var tvhFile = JsonConvert.DeserializeObject<T>(json);
                 tvhFile._originalJson = json;
-                tvhFile.Id = tvhFile.ExtractId(filename);
+                tvhFile.uuid = tvhFile.ExtractId(filename);
                 tvhFile.State = State.Loaded;
                 return tvhFile;
             }
@@ -104,12 +108,12 @@ namespace GlashartLibrary.TvHeadend
             var folder = fileinfo.Directory;
             if (fileinfo.Exists)
             {
-                Logger.DebugFormat("Remove file {0} for {1} {2}", file, GetType().Name, Id);
+                Logger.DebugFormat("Remove file {0} for {1} {2}", file, GetType().Name, uuid);
                 fileinfo.Delete();
             }
             if (folder != null && folder.Exists && !folder.EnumerateFiles().Any())
             {
-                Logger.DebugFormat("Remove empty folder {0} for {1} {2}", folder, GetType().Name, Id);
+                Logger.DebugFormat("Remove empty folder {0} for {1} {2}", folder, GetType().Name, uuid);
                 folder.Delete(true);
             }
             State = State.Removed;

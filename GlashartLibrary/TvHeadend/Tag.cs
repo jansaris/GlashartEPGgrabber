@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using GlashartLibrary.TvHeadend.Web;
 using log4net;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public class Tag : TvhFile
+    public class Tag : TvhObject
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Tag));
 
@@ -59,7 +60,7 @@ namespace GlashartLibrary.TvHeadend
                 Directory.CreateDirectory(folder);
             }
 
-            var file = Path.Combine(folder, Id);
+            var file = Path.Combine(folder, uuid);
             SaveToFile(file);
         }
 
@@ -75,7 +76,19 @@ namespace GlashartLibrary.TvHeadend
 
         public void Remove(string tvhFolder)
         {
-            RemoveFromFile(Path.Combine(GetFolder(tvhFolder), Id));
+            RemoveFromFile(Path.Combine(GetFolder(tvhFolder), uuid));
+        }
+
+        public override Urls Urls
+        {
+            get
+            {
+                return new Urls
+                {
+                    List = "/api/channeltag/grid",
+                    Create = "/api/channeltag/create"
+                };
+            }
         }
     }
 }

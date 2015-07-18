@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using GlashartLibrary.TvHeadend.Web;
 using log4net;
 using Newtonsoft.Json;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public class Network : TvhFile
+    public class Network : TvhObject
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Network));
 
@@ -50,7 +51,7 @@ namespace GlashartLibrary.TvHeadend
 
         public void SaveToDisk(string tvhFolder)
         {
-            var folder = Path.Combine(GetFolder(tvhFolder), Id);
+            var folder = Path.Combine(GetFolder(tvhFolder), uuid);
             if (!Directory.Exists(folder))
             {
                 Logger.DebugFormat("Folder doesn't exist, create {0}", folder);
@@ -97,7 +98,7 @@ namespace GlashartLibrary.TvHeadend
 
         private static void ReadMuxes(Network network, string muxesFolder)
         {
-            Logger.DebugFormat("Read muxes for network {0} ({1}) from disk", network.Id, network.networkname);
+            Logger.DebugFormat("Read muxes for network {0} ({1}) from disk", network.uuid, network.networkname);
             if (!Directory.Exists(muxesFolder))
             {
                 Logger.DebugFormat("The folder {0} doesn't exist, skip reading muxes for network {1}", muxesFolder, network.networkname);
@@ -108,7 +109,7 @@ namespace GlashartLibrary.TvHeadend
                          .Select(Mux.ReadFromDisk)
                          .Where(mux => mux != null)
             );
-            network.Muxes.ForEach(m => m.NetworkId = network.Id);
+            network.Muxes.ForEach(m => m.network_uuid = network.uuid);
         }
 
         private static string GetFolder(string tvhFolder)
@@ -119,6 +120,18 @@ namespace GlashartLibrary.TvHeadend
         private static string GetFileName(string networkFolder)
         {
             return Path.Combine(networkFolder, "config");
+        }
+
+        public override Urls Urls
+        {
+            get
+            {
+                return new Urls
+                {
+                    List = "/api/mpegts/network/grid",
+                    Create = "/api/mpegts/network/create"
+                };
+            }
         }
 
         protected override string ExtractId(string filename)
@@ -143,11 +156,11 @@ namespace GlashartLibrary.TvHeadend
             }
             if (!Muxes.Contains(mux))
             {
-                Logger.ErrorFormat("Can't mux {0} because it doesn't belong to network {1}", mux.Id, Id);
+                Logger.ErrorFormat("Can't mux {0} because it doesn't belong to network {1}", mux.uuid, uuid);
                 return;
             }
             var networksFolder = GetFolder(tvhFolder);
-            var thisNetworkFolder = Path.Combine(networksFolder, Id);
+            var thisNetworkFolder = Path.Combine(networksFolder, uuid);
             mux.Remove(GetMuxFolder(thisNetworkFolder));
         }
     }

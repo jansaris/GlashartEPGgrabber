@@ -232,5 +232,14 @@ namespace GlashartLibrary.Properties {
                 return ((int)(this["TvheadendExtraSerivesPerMux"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost:9981")]
+        public string TvheadendHostAddress {
+            get {
+                return ((string)(this["TvheadendHostAddress"]));
+            }
+        }
     }
 }

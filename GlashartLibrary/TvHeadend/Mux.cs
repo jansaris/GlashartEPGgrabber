@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using GlashartLibrary.TvHeadend.Web;
 using log4net;
 using Newtonsoft.Json;
 
 namespace GlashartLibrary.TvHeadend
 {
-    public class Mux : TvhFile
+    public class Mux : TvhObject
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Mux));
 
@@ -15,25 +16,35 @@ namespace GlashartLibrary.TvHeadend
             get { return "/api/mpegts/network/mux_create"; }
         }
 
+        public override Urls Urls
+        {
+            get
+            {
+                return new Urls
+                {
+                    List = "/api/mpegts/mux/grid",
+                    Create = "/api/mpegts/network/mux_create"
+                };
+            }
+        }
+
         public override object CreateData
         {
             get
             {
                 return new
                 {
-                    uuid = NetworkId,
+                    uuid = network_uuid,
                     conf = this
                 };
             }
         }
 
         [JsonIgnore]
-        public string NetworkId { get; set; }
-
-        [JsonIgnore]
         public List<Service> Services { get; set; }
 
         /*TvHeadend properties*/
+        public string network_uuid { get; set; }
         public string iptv_url { get; set; }
         public string iptv_interface { get; set; }
         public string iptv_muxname { get; set; }
@@ -81,7 +92,7 @@ namespace GlashartLibrary.TvHeadend
         {
             if (State == State.Removed) return;
 
-            var folder = Path.Combine(networkFolder, Id);
+            var folder = Path.Combine(networkFolder, uuid);
             if (!Directory.Exists(folder))
             {
                 Logger.DebugFormat("Folder doesn't exist, create {0}", folder);
@@ -94,7 +105,7 @@ namespace GlashartLibrary.TvHeadend
 
         private static void ReadServices(Mux mux, string folder)
         {
-            Logger.DebugFormat("Read services for mux {0} ({1}) from disk", mux.Id, mux.iptv_url);
+            Logger.DebugFormat("Read services for mux {0} ({1}) from disk", mux.uuid, mux.iptv_url);
             if (!Directory.Exists(folder))
             {
                 Logger.DebugFormat("The folder {0} doesn't exist, skip reading services for mux {1}", folder, mux.iptv_muxname);
@@ -132,7 +143,7 @@ namespace GlashartLibrary.TvHeadend
 
         public void Remove(string networkFolder)
         {
-            var folder = Path.Combine(networkFolder, Id);
+            var folder = Path.Combine(networkFolder, uuid);
             Services.ForEach(s => s.Remove(GetServicesFolder(folder)));
             var file = GetFileName(folder);
             RemoveFromFile(file);
